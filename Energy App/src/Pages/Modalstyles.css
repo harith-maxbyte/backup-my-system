@@ -1,0 +1,29 @@
+.customButton {
+    width: 60px;
+    height: 2.5rem;
+    letter-spacing: 0.5px;
+    background-color: #307a28;
+    color: white;
+    font-size: 12px;
+    border: 1.5px solid #307a28;
+    cursor: pointer;
+    }
+
+.active{
+    background-color: rgb(25, 26, 24);
+    }
+
+
+
+  
+
+   /* mobile screens */
+    /* @media (max-width:480px){
+        .customButton {display:none}
+    } */
+    
+    /* For Tablets */
+    /* @media only screen and (min-width: 1024px) and (max-width: 1440px){
+        .machine-header {margin-left: "200px";}
+    } */
+
