@@ -7,10 +7,9 @@ import moment from 'moment';
 import Dashstyles1 from './Dashboardstyles1'
 import { connect } from 'react-redux';
 import {
-	EnergyMonthly, ShiftMonthly, ShiftDaily, ShiftWeekly, ShiftYear
+	EnergyMonthly, ShiftDaily,
 	// ShiftCustom
 } from "../store/actions/index";
-
 
 
 const Modal = lazy(() => import('./Modal'));
@@ -37,6 +36,7 @@ const LightTooltip = styled(({ className, ...props }) => (
 // let useBtn = []
 let month = []
 let todayconsume = 0.0;
+
 class Dashboard1 extends PureComponent {
 	constructor(props) {
 		super(props);
@@ -49,16 +49,10 @@ class Dashboard1 extends PureComponent {
 
 	}
 	componentDidMount() {
-		// this.props.dispatch(EnergyDaily())
-		this.props.dispatch(EnergyMonthly())
-
-		this.props.dispatch(ShiftDaily())
-		this.props.dispatch(ShiftWeekly())
-		this.props.dispatch(ShiftMonthly())
-		this.props.dispatch(ShiftYear())
+		this.props.dispatch(ShiftDaily(localStorage.getItem("Device")))
+		this.props.dispatch(EnergyMonthly(localStorage.getItem("Device")))
 
 	}
-
 
 	/**
 	* @function
@@ -87,6 +81,7 @@ class Dashboard1 extends PureComponent {
 
 			time.push(this.timeConverter(edate[0]))
 			seriesData.push((todayconsume).toFixed(2))
+
 			series = [
 				{ name: "Energy Consumption", data: seriesData }
 			]
@@ -407,7 +402,7 @@ class Dashboard1 extends PureComponent {
 				shifta = shifta + item.shiftEnergyVal
 				: ""
 		))
-		todayconsume = shifta
+		// todayconsume = shifta
 		return shifta;
 	}
 
@@ -418,7 +413,7 @@ class Dashboard1 extends PureComponent {
 				shiftb = shiftb + item.shiftEnergyVal
 				: ""
 		))
-		todayconsume += shiftb
+		// todayconsume += shiftb
 		return shiftb;
 	}
 
@@ -429,9 +424,19 @@ class Dashboard1 extends PureComponent {
 				shiftc = shiftc + item.shiftEnergyVal
 				: ""
 		))
-		todayconsume += shiftc
+		// todayconsume += shiftc
 		return shiftc;
 	}
+
+	todaychecking = (data) => {
+		var a = 0
+		for (var i in data) {
+			a += data[i].shiftEnergyVal;
+		}
+		todayconsume = a
+		return a.toFixed(2)
+	}
+
 
 	/** shifwise Consumption maily needs it - Don't delete it */
 	// shiftwiseReport = (selectedButton, shiftDailyData, shiftWeeklyData, shiftMonthlyData, shiftCustomData, shiftYearlyData) => {
@@ -452,7 +457,10 @@ class Dashboard1 extends PureComponent {
 	// 	}
 	// }
 
-
+	/**
+	 * 
+	 * @Performance checking 
+	 */
 	// callback = (id, phase, actualTime, baseTime, startTime, commitTime) => {
 	// 	console.table({ id, phase, actualTime, baseTime, startTime, commitTime })
 	// }
@@ -471,16 +479,19 @@ class Dashboard1 extends PureComponent {
 				<div className={classes.device}>
 					<h3 className={classes.machinetitle}>
 						<Suspense>
-							<Device />
+							<Device state="dashboard1" />
 						</Suspense>
 					</h3>
+
 					<div className={classes.machineheader}><Suspense><Modal /></Suspense></div>
 				</div>
 
 				<Grid container spacing={2}>
 					<Grid item xs={12} sm={12} md={12}>
 						<div className={classes.dashboardbtn}>
-							<Link style={{ textDecoration: 'none', color: 'white' }} to="/energy-meter-real-time">
+							<Link style={{ textDecoration: 'none', color: 'white' }}
+								to={{ pathname: "/energy-meter-real-time" }}>
+
 								<LightTooltip title={`Live Dashboard`}>
 									<IconButton color="inherit" className={classes.myClassName}>
 										<i className='bx bx-grid-alt' animation='tada'></i>
@@ -515,8 +526,11 @@ class Dashboard1 extends PureComponent {
 											})
 											: <p style={{ margin: 0 }}>0.00 kWh</p>
 										} */}
-										<p style={{ margin: 0 }}>{todayconsume.toFixed(2)} kWh</p>
-										<p style={{ margin: 0 }} ref={el => this.myElement = el} >Today's Consumption</p>
+										<p style={{ margin: 0 }}>
+											{/* {todayconsume.toFixed(2)} kWh */}
+											{this.todaychecking(shiftDailyData, energyMonthlyChart)} kWh
+										</p>
+										<p style={{ margin: 0 }} ref={el => this.myElement = el}>Today's Consumption</p>
 									</div>
 								</div>
 							</Card>
@@ -527,7 +541,9 @@ class Dashboard1 extends PureComponent {
 								<div className={classes.second}>
 									<div className={classes.icon}>{this.monthIconSelection()}</div>
 									<div className={classes.firstinnertxt}>
-										<p style={{ margin: 0 }} >{month[1]} kWh</p>
+										<p style={{ margin: 0 }} >
+											{month[1]} kWh
+										</p>
 										<p style={{ margin: 0 }}>Month Consumption</p>
 									</div>
 								</div>

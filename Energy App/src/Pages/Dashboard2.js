@@ -11,6 +11,7 @@ import electricity from '../assets/images/png/electricity.png';
 import highVoltage from "../assets/images/png/high-voltage.png"
 import { START_TIME, END_TIME } from "../Helpers/Constatnt"
 
+
 /**
  * @class
  * Class representing Dashboard component
@@ -37,71 +38,81 @@ class Dashboard2 extends PureComponent {
 		}
 	}
 
-	async componentDidMount() {
-		await this.loadData()
+	componentDidMount() {
+		this.loadData(localStorage.getItem("Device"))
 	}
 
 	/**
 	* @INTIAL_LOAD
 	*  required method
 	*/
-	loadData = () => {
-		axios.get(`https://janaaticsfunctionapp.azurewebsites.net/api/GetTimeSeriesData?code=5rUZrumKciSJ7bfhQjR38Qxkk7nUhTNR63phSsDHQOyRCisQ3CeuBA==&deviceid=EWON_FLEXY103&startTime=${START_TIME}&endTime=${END_TIME}`)
+	loadData = (device) => {
+		axios.get(`https://janaaticsfunctionapp.azurewebsites.net/api/GetTimeSeriesData?code=5rUZrumKciSJ7bfhQjR38Qxkk7nUhTNR63phSsDHQOyRCisQ3CeuBA==&deviceid=${device}&startTime=${START_TIME}&endTime=${END_TIME}`)
 			.then(res => {
 				this.setState({ val: res.data });
 			})
 			.then(v => {
-				var t = []
-
-				// eslint-disable-next-line
-				this.state.val && this.state.val.length > 0 && this.state.val.map((v) => {
-					// var parsed = [v.data.slice(0, 1), '"', v.data.slice(1)].join('');
-					// t.push(JSON.parse(parsed))
-					t.push(JSON.parse(v.data))
-				})
-
-				if ((t.pop().Current) && (!t.pop().Current1)) {
-					this.setState({
-						current: t.pop().Current,
-						energy: t.pop().Energy,
-						Powerfactor: t.pop().Powerfactor,
-						voltage: t.pop().Voltage,
-					})
-				}
-				else if (((t.pop().Current) && (t.pop().Current1)) || (t.pop().Current2)) {
-					this.setState({
-						current: t.pop().Current,
-						energy: t.pop().Energy,
-						Powerfactor: t.pop().Powerfactor,
-						voltage: t.pop().Voltage,
-
-						current1: t.pop().Current1,
-						energy1: t.pop().Energy1,
-						Powerfactor1: t.pop().Powerfactor1,
-						voltage1: t.pop().Voltage1,
+				if (this.state.val.length > 0) {
+					var t = []
+					// eslint-disable-next-line
+					this.state.val && this.state.val.length > 0 && this.state.val.map((v) => {
+						// var parsed = [v.data.slice(0, 1), '"', v.data.slice(1)].join('');
+						// t.push(JSON.parse(parsed))
+						t.push(JSON.parse(v.data))
 					})
 
+					if ((t.pop().Current) && (!t.pop().Current1)) {
+						this.setState({
+							current: t.pop().Current,
+							energy: t.pop().Energy,
+							Powerfactor: t.pop().Powerfactor,
+							voltage: t.pop().Voltage,
+						})
+					}
+					else if (((t.pop().Current) && (t.pop().Current1)) || (t.pop().Current2)) {
+						this.setState({
+							current: t.pop().Current,
+							energy: t.pop().Energy,
+							Powerfactor: t.pop().Powerfactor,
+							voltage: t.pop().Voltage,
+
+							current1: t.pop().Current1,
+							energy1: t.pop().Energy1,
+							Powerfactor1: t.pop().Powerfactor1,
+							voltage1: t.pop().Voltage1,
+						})
+
+					}
+					else {
+						this.setState({
+							current: t.pop().Current,
+							energy: t.pop().Energy,
+							Powerfactor: t.pop().Powerfactor,
+							voltage: t.pop().Voltage,
+
+							current1: t.pop().Current1,
+							energy1: t.pop().Energy1,
+							Powerfactor1: t.pop().Powerfactor1,
+							voltage1: t.pop().Voltage1,
+
+							current2: t.pop().Current2,
+							energy2: t.pop().Energy2,
+							Powerfactor2: t.pop().Powerfactor2,
+							voltage2: t.pop().Voltage2,
+						})
+
+					}
 				}
 				else {
 					this.setState({
-						current: t.pop().Current,
-						energy: t.pop().Energy,
-						Powerfactor: t.pop().Powerfactor,
-						voltage: t.pop().Voltage,
-
-						current1: t.pop().Current1,
-						energy1: t.pop().Energy1,
-						Powerfactor1: t.pop().Powerfactor1,
-						voltage1: t.pop().Voltage1,
-
-						current2: t.pop().Current2,
-						energy2: t.pop().Energy2,
-						Powerfactor2: t.pop().Powerfactor2,
-						voltage2: t.pop().Voltage2,
+						current: 0.00,
+						energy: 0.00,
+						Powerfactor: 0.00,
+						voltage: 0.00,
 					})
-
 				}
 			})
+			.catch(err => { })
 	}
 
 	/**
@@ -760,7 +771,7 @@ class Dashboard2 extends PureComponent {
 						</IconButton>
 					</Link>
 					<span style={{ display: "contents", fontFamily: "Poppins, sans-serif", fontWeight: 500, fontSize: "15px", color: "#fff" }}>
-						<Device />
+						<Device state="dashboard2" func={this.loadData} />
 					</span>
 
 				</div>

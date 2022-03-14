@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import DatePicker from '@mui/lab/DatePicker';
 import { AiFillCloseCircle } from "react-icons/ai";
 import "./Modalstyles.css";
-import { EnergyDaily, ShiftDaily, EnergyWeekly, ShiftWeekly, selectedBtn, CustomBtn, EnergyMonthly, ShiftMonthly, EnergyYear, ShiftYear, EnergyCustom, ShiftCustom } from '../store/actions/index';
+import { EnergyDaily, EnergyWeekly, ShiftWeekly, selectedBtn, CustomBtn, EnergyMonthly, ShiftMonthly, EnergyYear, ShiftYear, EnergyCustom, ShiftCustom } from '../store/actions/index';
 import moment from 'moment';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -58,65 +58,80 @@ function Modal() {
     const [clickedbtn, setClickedbtn] = useState("Day");
 
     useEffect(() => {
-        // textInput.current.focus();
-        setClickedId(0);
-        setSide(false);
-        setClickedbtn("Day")
-        dispatch(selectedBtn(clickedbtn))
+
+        let unmounted = false
+        if (!unmounted) {
+            // textInput.current.focus();
+            setClickedId(0);
+            setSide(false);
+            setClickedbtn("Day")
+            dispatch(selectedBtn(clickedbtn))
+        }
+        return () => { unmounted = true }
     }, [])// eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
-        dispatch(selectedBtn(clickedbtn))
-        if (clickedbtn === "Day") {
-            dispatch(EnergyDaily())
-            dispatch(ShiftDaily())
-        }
 
-        if (clickedbtn === "Week") {
-            dispatch(EnergyWeekly())
-            dispatch(ShiftWeekly())
-        }
+        let unmounted = false
+        if (!unmounted) {
+            dispatch(selectedBtn(clickedbtn))
+            if (clickedbtn === "Day") {
+                dispatch(EnergyDaily(localStorage.getItem("Device")))
+                // dispatch(ShiftDaily(localStorage.getItem("Device")))
+            }
 
-        if (clickedbtn === "Month") {
-            dispatch(EnergyMonthly())
-            dispatch(ShiftMonthly())
-        }
+            if (clickedbtn === "Week") {
+                dispatch(EnergyWeekly(localStorage.getItem("Device")))
+                dispatch(ShiftWeekly(localStorage.getItem("Device")))
+            }
 
-        if (clickedbtn === "Year") {
-            dispatch(EnergyYear())
-            dispatch(ShiftYear())
-        }
+            if (clickedbtn === "Month") {
+                dispatch(EnergyMonthly(localStorage.getItem("Device")))
+                dispatch(ShiftMonthly(localStorage.getItem("Device")))
+            }
 
-        setFrom(null)
-        setTo(null)
-        dispatch(CustomBtn(null))
+            if (clickedbtn === "Year") {
+                dispatch(EnergyYear(localStorage.getItem("Device")))
+                dispatch(ShiftYear(localStorage.getItem("Device")))
+            }
+
+            setFrom(null)
+            setTo(null)
+            dispatch(CustomBtn(null))
+        }
+        return () => { unmounted = true }
     }, [clickedbtn])// eslint-disable-line react-hooks/exhaustive-deps
 
     useEffect(() => {
-        dispatch(selectedBtn(clickedbtn))
-        if (clickedbtn === "Custom") {
-            if (moment(moment(from).year(), 'YYYY', true).isValid() && moment(moment(to).year(), 'YYYY', true).isValid()) {
-                const is_before_date = (date1, date2) => date1 <= date2;
-                var temp = is_before_date(new Date(from), new Date(to))
-                //CORRECT DATE
-                if (temp === true) {
-                    if (!toast.isActive(toastId.current)) {
-                        toast.dismiss()
+        let unmounted = false
+        if (!unmounted) {
+            dispatch(selectedBtn(clickedbtn))
+            if (clickedbtn === "Custom") {
+                if (moment(moment(from).year(), 'YYYY', true).isValid() && moment(moment(to).year(), 'YYYY', true).isValid()) {
+                    const is_before_date = (date1, date2) => date1 <= date2;
+                    var temp = is_before_date(new Date(from), new Date(to))
+                    //CORRECT DATE
+                    if (temp === true) {
+                        if (!toast.isActive(toastId.current)) {
+                            toast.dismiss()
+                        }
+                        var fr = moment.utc(from).format('MM/DD/YY')
+                        var t = moment.utc(to).format('MM/DD/YY')
+                        dispatch(CustomBtn([fr, t]))
+                        dispatch(EnergyCustom(fr, t, localStorage.getItem("Device")))
+                        dispatch(ShiftCustom(fr, t, localStorage.getItem("Device")))
+
                     }
-                    var fr = moment.utc(from).format('MM/DD/YY')
-                    var t = moment.utc(to).format('MM/DD/YY')
-                    dispatch(CustomBtn([fr, t]))
-                    dispatch(EnergyCustom(fr, t))
-                    dispatch(ShiftCustom(fr, t))
-                }
-                //FALSE DATE
-                else {
-                     toast.error("Invalid Date!!", {
-                        toastId: customId
-                    });
+                    //FALSE DATE
+                    else {
+                        toast.error("Invalid Date!!", {
+                            toastId: customId
+                        });
+                    }
                 }
             }
         }
+        return () => { unmounted = true }
     }, [from, to])// eslint-disable-line react-hooks/exhaustive-deps
 
     const handleClick = (event, id) => {

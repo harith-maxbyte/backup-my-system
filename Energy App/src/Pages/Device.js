@@ -1,6 +1,8 @@
 import { MenuItem, Select } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { DeviceList, EnergyDaily, EnergyWeekly, EnergyYear, EnergyCustom, ShiftCustom, EnergyMonthly, ShiftDaily, ShiftWeekly, ShiftMonthly, ShiftYear } from '../store/actions/index'
 
 const useStyles = makeStyles(theme => ({
     "@global": {
@@ -85,20 +87,63 @@ const useStyles = makeStyles(theme => ({
 //     }
 // });
 
-function App() {
+function App(props) {
+
     const classes = useStyles();
-    const [age, setAge] = React.useState("");
+    const dispatch = useDispatch()
+
+    const [dev, setDev] = React.useState(localStorage.getItem("Device"));
+
+    useEffect(() => {
+        let unmounted = false
+        if (!unmounted) {
+            dispatch(DeviceList())
+            setDev(localStorage.getItem("Device"))
+        }
+        return () => { unmounted = true }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
+    let Device = useSelector(state => { return state.loggedReducer.device });
+    let button = useSelector(state => { return state.loggedReducer.btn });
+    let fromto = useSelector(state => { return state.loggedReducer.custombtn });
 
     const handleChange = (event) => {
-        setAge(event.target.value);
-    };
+        setDev(event.target.value);
+        localStorage.setItem("Device", event.target.value);
 
+        if (props.state === "dashboard1") {
+            dispatch(EnergyDaily(event.target.value))
+            dispatch(ShiftDaily(event.target.value))
+            dispatch(EnergyMonthly(event.target.value))
+
+            if (button === "Week") {
+                dispatch(EnergyWeekly(event.target.value))
+                dispatch(ShiftWeekly(event.target.value))
+            }
+            if (button === "Month") {
+                dispatch(ShiftMonthly(event.target.value))
+            }
+            if (button === "Year") {
+                dispatch(EnergyYear(event.target.value))
+                dispatch(ShiftYear(event.target.value))
+            }
+            if (button === "Custom") {
+                dispatch(EnergyCustom(fromto[0], fromto[1], event.target.value))
+                dispatch(ShiftCustom(fromto[0], fromto[1], event.target.value))
+            }
+        }
+        else {
+            props.func(event.target.value)
+        }
+    };
     return (
         <React.Fragment>
             <Select
-                value={age}
-                onChange={handleChange}
-                displayEmpty
+                value={dev}
+                onChange={(e) => handleChange(e)}
+                defaultValue={localStorage.getItem("Device")}
+                // defaultValue=""
                 className={classes.quantityRoot}
                 inputProps={{
                     classes: {
@@ -107,44 +152,16 @@ function App() {
                     },
                 }}
             >
-                <MenuItem value="">Laser Bar Code Printer</MenuItem>
+                {Device.length !== 0 && Device.map(v => {
+                    return (
+                        <MenuItem key={v.deviceid} value={v.deviceid}>
+                            {v.deviceid}
+                        </MenuItem>
+                    )
+                })
+                }
             </Select>
         </React.Fragment>
-        // <FormControl sx={{ m: 1, minWidth: 80 }}>
-        //     <InputLabel id="demo-simple-select-autowidth-label">Age</InputLabel>
-        //     <Select
-        //         labelId="demo-simple-select-autowidth-label"
-        //         id="demo-simple-select-autowidth"
-        //         value={age}
-        //         onChange={handleChange}
-        //         autoWidth
-        //         label="Age"
-        //     >
-        //         <MenuItem value="">
-        //             <em>None</em>
-        //         </MenuItem>
-        //         <MenuItem value={10}>Twenty</MenuItem>
-        //         <MenuItem value={21}>Twenty one</MenuItem>
-        //         <MenuItem value={22}>Twenty one and a half</MenuItem>
-        //     </Select>
-        // </FormControl>
-
-        // <Paper>
-        //     <FormControl style={{ minWidth: "200px" }}>
-        //         <InputLabel htmlFor="age-simple">Age</InputLabel>
-        //         <Select
-        //             className={classes.select}
-        //             value={age}
-        //             onChange={event => setAge(event.target.value)}
-        //             inputProps={{
-        //                 name: "age",
-        //                 id: "age-simple"
-        //             }}
-        //         >
-        //             <MenuItem value="">Laser Bar Code Printer</MenuItem>
-        //         </Select>
-        //     </FormControl>
-        // </Paper>
     );
 }
 

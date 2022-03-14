@@ -13,7 +13,7 @@ const DashboardPage2 = lazy(() => import('./Pages/Dashboard2'));
 // const Maintenance = lazy(() => import('./Pages/Maintenance'));
 const MainDevice = lazy(() => import('./Pages/MainDevice'));
 
-const Routes = () => {
+const Routes = (props) => {
   return (
     <Suspense fallback={<Loading />}>
       <Router>
@@ -57,7 +57,7 @@ const Routes = () => {
           />
 
           <Route path="*" component={() => <center><h4>Invalid URL...</h4></center>} />
-
+        
         </Switch>
       </Router>
     </Suspense>

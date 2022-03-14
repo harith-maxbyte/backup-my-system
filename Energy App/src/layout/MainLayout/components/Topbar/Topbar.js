@@ -37,6 +37,8 @@ const Topbar = ({ classes, onToggleSidebar, isSidebarOpen }) => {
   let email = localStorage.getItem("email")
   const handleSignOut = () => {
     localStorage.removeItem("auth-token")
+    localStorage.removeItem("Device")
+    localStorage.removeItem("email")
     history.push("/")
   }
   return (
